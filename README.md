@@ -14,7 +14,7 @@ ActiveWeapon: Weapon
 weapons: Weapon[]
 armor: Armor[]
 
-### Monster
+### Enemy
 name: string
 health: int
 damage: int

@@ -3,12 +3,11 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Enemy>
  */
-class UserFactory extends Factory
+class EnemyFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -18,8 +17,9 @@ class UserFactory extends Factory
     public function definition()
     {
         return [
-            'username' => $this->faker->userName(),
+            'name' => $this->faker->word,
             'health' => $this->faker->numberBetween(60, 200),
+            'damage' => $this->faker->numberBetween(1, 10),
         ];
     }
 }
