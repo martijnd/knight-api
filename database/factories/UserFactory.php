@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Location;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -20,6 +21,7 @@ class UserFactory extends Factory
         return [
             'username' => $this->faker->userName(),
             'health' => $this->faker->numberBetween(60, 200),
+            'location_id' => Location::factory()->create(),
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 use App\Exceptions\UsernameAlreadyTakenException;
 use App\Models\Enemy;
+use App\Models\Location;
 use App\Models\User;
 use App\Models\Weapon;
 use Illuminate\Http\Request;
@@ -28,7 +29,9 @@ Route::post('/tokens/create', function (Request $request) {
         'username' => 'required|string|max:255|unique:users',
     ]);
 
-    $user = User::create($validated);
+    $location = Location::firstOrFail();
+
+    $user = User::create([...$validated, 'location_id' => $location->id]);
 
     $user->update(['weapon_id' => Weapon::first()->id]);
 

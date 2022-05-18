@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('health');
             $table->integer('damage');
             $table->integer('loot');
+            $table->foreignId('location_id')->constrained();
             $table->timestamps();
         });
     }

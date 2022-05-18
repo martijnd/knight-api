@@ -1,11 +1,13 @@
 <?php
 
+use App\Models\Location;
 use App\Models\Weapon;
 
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 
 it('creates and authenticates a user', function () {
+  Location::factory()->create();
   $username = 'TestUser';
   $payload = [
     'username' => $username,
@@ -29,6 +31,7 @@ it('creates and authenticates a user', function () {
 });
 
 it('handles existing usernames', function () {
+  Location::factory()->create();
   $username = 'TestUser';
   $payload = [
     'username' => $username,

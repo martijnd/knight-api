@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\LocationMismatchException;
 use App\Exceptions\UserAlreadyFightingException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -20,6 +21,7 @@ class User extends Authenticatable
     protected $fillable = [
         'username',
         'weapon_id',
+        'location_id',
     ];
 
     public function initiateFight(Enemy $enemy)
@@ -27,6 +29,10 @@ class User extends Authenticatable
         $this->load('fight');
         if ($this->fight) {
             throw new UserAlreadyFightingException;
+        }
+
+        if ($this->location_id !== $enemy->location_id) {
+            throw new LocationMismatchException;
         }
 
         Fight::create(

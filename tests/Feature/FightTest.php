@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Enemy;
+use App\Models\Location;
 use App\Models\User;
 use App\Models\Weapon;
 use Laravel\Sanctum\Sanctum;
@@ -9,12 +10,14 @@ use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\postJson;
 
 it('can fight an enemy', function () {
+    $location = Location::factory()->create();
     // Create a knight
     $user = User::factory()->create([
         'health' => 100,
         'weapon_id' => Weapon::factory()->create([
             'damage' => 10,
-        ])
+        ]),
+        'location_id' => $location->id,
     ]);
 
     $initialHealth = $user->health;
@@ -25,6 +28,7 @@ it('can fight an enemy', function () {
     $enemy = Enemy::factory()->create([
         'health' => 100,
         'damage' => 4,
+        'location_id' => $location->id,
     ]);
 
     postJson(route('fight', $enemy))
@@ -47,12 +51,14 @@ it('can fight an enemy', function () {
 });
 
 it('can only have one active fight', function () {
+    $location = Location::factory()->create();
     // Create a knight
     $user = User::factory()->create([
         'health' => 100,
         'weapon_id' => Weapon::factory()->create([
             'damage' => 10,
-        ])
+        ]),
+        'location_id' => $location->id,
     ]);
 
     Sanctum::actingAs($user);
@@ -61,6 +67,7 @@ it('can only have one active fight', function () {
     $enemy = Enemy::factory()->create([
         'health' => 100,
         'damage' => 4,
+        'location_id' => $location->id,
     ]);
 
     postJson(route('fight', $enemy))
@@ -71,12 +78,14 @@ it('can only have one active fight', function () {
 });
 
 it('can slay an enemy', function () {
+    $location = Location::factory()->create();
     // Create a knight
     $user = User::factory()->create([
         'health' => 100,
         'weapon_id' => Weapon::factory()->create([
             'damage' => 10,
-        ])
+        ]),
+        'location_id' => $location->id,
     ]);
 
     $initialHealth = $user->health;
@@ -84,11 +93,13 @@ it('can slay an enemy', function () {
 
     Sanctum::actingAs($user);
 
+
     // Create an enemy
     $enemy = Enemy::factory()->create([
         'health' => 100,
         'damage' => 4,
         'loot' => 20,
+        'location_id' => $location->id,
     ]);
 
     postJson(route('fight', $enemy))
@@ -119,4 +130,36 @@ it('can slay an enemy', function () {
 
     expect($user)
         ->gold->toEqual($initialGold + $enemy->loot);
+});
+
+it('cannot fight a monster outside its current location', function () {
+    // Create a knight
+    $user = User::factory()->create([
+        'health' => 100,
+        'weapon_id' => Weapon::factory()->create([
+            'damage' => 10,
+        ]),
+        'location_id' => Location::factory()->create([
+            'x' => 20,
+            'y' => 20,
+        ])
+    ]);
+
+    $enemyLocation = Location::factory()->create([
+        'x' => 30,
+        'y' => 30,
+    ]);
+
+    Sanctum::actingAs($user);
+
+    // Create an enemy
+    $enemy = Enemy::factory()->create([
+        'health' => 100,
+        'damage' => 4,
+        'loot' => 20,
+        'location_id' => $enemyLocation->id,
+    ]);
+
+    postJson(route('fight', $enemy))
+        ->assertStatus(401);
 });
