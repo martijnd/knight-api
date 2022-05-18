@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Enemy;
+use App\Models\Weapon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -14,11 +16,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // \App\Models\User::factory(10)->create();
+        Weapon::factory()->create([
+            'name' => 'Sword',
+            'damage' => 14,
+        ]);
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        Enemy::factory(10)->create();
     }
 }

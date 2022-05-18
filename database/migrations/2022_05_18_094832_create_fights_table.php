@@ -13,13 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('fights', function (Blueprint $table) {
             $table->id();
-            $table->string('username')->unique();
-            $table->integer('health')->default(100);
-            $table->integer('gold')->default(100);
-            $table->smallInteger('active_weapon_id')->nullable();
-            $table->smallInteger('fight_id')->nullable();
+            $table->foreignId('user_id')->constrained();
+            $table->foreignId('enemy_id')->constrained();
+            $table->integer('enemy_health');
             $table->timestamps();
         });
     }
@@ -31,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('fight_sessions');
     }
 };

@@ -8,9 +8,4 @@ use Illuminate\Database\Eloquent\Model;
 class Enemy extends Model
 {
     use HasFactory;
-
-    public function isAlive()
-    {
-        return $this->health > 0;
-    }
 }

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('name');
             $table->integer('health');
             $table->integer('damage');
+            $table->integer('loot');
             $table->timestamps();
         });
     }

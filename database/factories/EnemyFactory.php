@@ -20,6 +20,7 @@ class EnemyFactory extends Factory
             'name' => $this->faker->word,
             'health' => $this->faker->numberBetween(60, 200),
             'damage' => $this->faker->numberBetween(1, 10),
+            'loot' => $this->faker->numberBetween(1, 50),
         ];
     }
 }

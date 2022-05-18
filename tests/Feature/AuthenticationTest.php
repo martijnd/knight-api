@@ -1,11 +1,7 @@
 <?php
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
-
-uses(RefreshDatabase::class);
 
 it('creates and authenticates a user', function () {
   $username = 'TestUser';

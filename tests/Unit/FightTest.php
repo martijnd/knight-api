@@ -1,13 +1,8 @@
 <?php
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
 use App\Models\User;
 use App\Models\Weapon;
 use App\Models\Enemy;
-
-uses(RefreshDatabase::class);
-
 
 it('can fight with a monster', function () {
   // Create a knight
@@ -43,4 +38,4 @@ it('can fight with a monster', function () {
   expect($enemy)
     ->health->toBe(0)
     ->isAlive()->toBe(false);
-});
+})->skip();
