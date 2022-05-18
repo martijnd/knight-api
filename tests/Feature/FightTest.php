@@ -12,7 +12,7 @@ it('can fight an enemy', function () {
     // Create a knight
     $user = User::factory()->create([
         'health' => 100,
-        'active_weapon_id' => Weapon::factory()->create([
+        'weapon_id' => Weapon::factory()->create([
             'damage' => 10,
         ])
     ]);
@@ -27,7 +27,7 @@ it('can fight an enemy', function () {
         'damage' => 4,
     ]);
 
-    postJson("/api/enemies/{$enemy->id}/fight")
+    postJson(route('fight', $enemy))
         ->assertOk();
 
     assertDatabaseHas('fights', [
@@ -36,7 +36,7 @@ it('can fight an enemy', function () {
         'enemy_health' => $enemy->health,
     ]);
 
-    $response = postJson("/api/enemies/{$enemy->id}/attack")
+    $response = postJson(route('attack'))
         ->assertOk();
 
     expect($response->decodeResponseJson()['data'])
@@ -46,11 +46,35 @@ it('can fight an enemy', function () {
         ]);
 });
 
+it('can only have one active fight', function () {
+    // Create a knight
+    $user = User::factory()->create([
+        'health' => 100,
+        'weapon_id' => Weapon::factory()->create([
+            'damage' => 10,
+        ])
+    ]);
+
+    Sanctum::actingAs($user);
+
+    // Create an enemy
+    $enemy = Enemy::factory()->create([
+        'health' => 100,
+        'damage' => 4,
+    ]);
+
+    postJson(route('fight', $enemy))
+        ->assertOk();
+
+    postJson(route('fight', $enemy))
+        ->assertStatus(301);
+});
+
 it('can slay an enemy', function () {
     // Create a knight
     $user = User::factory()->create([
         'health' => 100,
-        'active_weapon_id' => Weapon::factory()->create([
+        'weapon_id' => Weapon::factory()->create([
             'damage' => 10,
         ])
     ]);
@@ -67,7 +91,7 @@ it('can slay an enemy', function () {
         'loot' => 20,
     ]);
 
-    postJson("/api/enemies/{$enemy->id}/fight")
+    postJson(route('fight', $enemy))
         ->assertOk();
 
     assertDatabaseHas('fights', [
@@ -78,12 +102,12 @@ it('can slay an enemy', function () {
 
     // Attack 9 times
     for ($i = 0; $i < 9; $i++) {
-        postJson("/api/enemies/{$enemy->id}/attack")
+        postJson(route('attack'))
             ->assertOk();
     }
 
     // This attack should kill the enemy
-    $response = postJson("/api/enemies/{$enemy->id}/attack")
+    $response = postJson(route('attack'))
         ->assertOk();
 
     expect($response->decodeResponseJson()['data'])
@@ -94,6 +118,5 @@ it('can slay an enemy', function () {
         ]);
 
     expect($user)
-        ->gold->toEqual($initialGold + $enemy->loot)
-        ->current_fight_id->toBe(null);
+        ->gold->toEqual($initialGold + $enemy->loot);
 });

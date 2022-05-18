@@ -18,8 +18,7 @@ return new class extends Migration
             $table->string('username')->unique();
             $table->integer('health')->default(100);
             $table->integer('gold')->default(100);
-            $table->smallInteger('active_weapon_id')->nullable();
-            $table->smallInteger('fight_id')->nullable();
+            $table->foreignId('weapon_id')->nullable()->constrained();
             $table->timestamps();
         });
     }

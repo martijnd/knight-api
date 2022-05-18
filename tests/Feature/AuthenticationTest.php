@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Weapon;
+
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 
@@ -8,6 +10,10 @@ it('creates and authenticates a user', function () {
   $payload = [
     'username' => $username,
   ];
+
+  Weapon::factory()->create([
+    'damage' => 10,
+  ]);
 
   // Generate a token
   $response = postJson('/api/tokens/create', $payload)
@@ -23,16 +29,20 @@ it('creates and authenticates a user', function () {
 });
 
 it('handles existing usernames', function () {
-    $username = 'TestUser';
-    $payload = [
-      'username' => $username,
-    ];
+  $username = 'TestUser';
+  $payload = [
+    'username' => $username,
+  ];
 
-    // Generate a token
-    postJson('/api/tokens/create', $payload)
-      ->assertOk();
+  Weapon::factory()->create([
+    'damage' => 10,
+  ]);
 
-    postJson('/api/tokens/create', $payload)
-      ->assertStatus(401)
-      ->assertJson(['message' => 'Username already taken.']);
+  // Generate a token
+  postJson('/api/tokens/create', $payload)
+    ->assertOk();
+
+  postJson('/api/tokens/create', $payload)
+    ->assertStatus(401)
+    ->assertJson(['message' => 'Username already taken.']);
 });

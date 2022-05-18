@@ -19,55 +19,59 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'username',
-        'active_weapon_id',
-        'fight_id',
+        'weapon_id',
     ];
 
-    public function fight(Enemy $enemy)
+    public function initiateFight(Enemy $enemy)
     {
-        if ($this->currentFight) {
+        $this->load('fight');
+        if ($this->fight) {
             throw new UserAlreadyFightingException;
         }
 
-        $fight = Fight::create(
+        Fight::create(
             [
                 'user_id' => $this->id,
                 'enemy_id' => $enemy->id,
                 'enemy_health' => $enemy->health
             ]
         );
-
-        $this->update(['fight_id' => $fight->id]);
     }
 
-    public function attack(Enemy $enemy)
+    public function attack()
     {
+        $this->load('fight');
+        $enemy = $this->fight->enemy;
         $this->health -= $enemy->damage;
 
-        if ($this->isAlive()) {
-            $this->currentFight->update([
-                'enemy_health' => $this->currentFight->enemy_health -= $this->activeWeapon?->damage ?? 2
-            ]);
-
-            if ($this->health - $enemy->damage <= 0) {
-                $this->update(['health' => 100, 'gold' => intval($this->gold / 2)]);
-
-                return ['message' => 'You died!', 'data' => ['gold' => intval($this->gold / 2)]];
-            }
-
-            $this->update(['health' => $this->health - $enemy->damage]);
+        // If killed by enemy attack
+        if (! $this->isAlive()) {
+            $this->update(['health' => 100, 'gold' => intval($this->gold / 2)]);
+            
+            return ['message' => 'You died!', 'data' => ['gold' => intval($this->gold / 2)]];
         }
 
-        if ($this->currentFight->enemyIsAlive()) {
+        // Decrease the enemy's health by the amount of damage done by the user
+        $this->fight->update([
+            'enemy_health' => $this->fight->enemy_health -= $this->activeWeapon?->damage ?? 2
+        ]);
+
+        // Decrease the user's health by the amount of damage done by the enemy 
+        $this->update(['health' => $this->health - $enemy->damage]);
+
+        // If the enemy is still alive, return the current fight's health amounts
+        if ($this->fight->enemyIsAlive()) {
             return [
                 'user_health' => $this->health,
-                'enemy_health' => $this->currentFight->enemy_health,
+                'enemy_health' => $this->fight->enemy_health,
             ];
         }
 
+        // If the enemy is killed, update the user's gold
         $this->update(['gold' => $this->gold += $enemy->loot]);
-
-        $this->currentFight->delete();
+        
+        // The fight is over, so delete it
+        $this->fight->delete();
 
         return [
             'user_health' => $this->health,
@@ -83,11 +87,11 @@ class User extends Authenticatable
 
     public function activeWeapon()
     {
-        return $this->belongsTo(Weapon::class, 'active_weapon_id');
+        return $this->belongsTo(Weapon::class, 'weapon_id');
     }
 
-    public function currentFight()
+    public function fight()
     {
-        return $this->belongsTo(Fight::class, 'fight_id');
+        return $this->hasOne(Fight::class, 'user_id');
     }
 }

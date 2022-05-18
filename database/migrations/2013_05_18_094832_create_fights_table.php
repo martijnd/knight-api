@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('fights', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained();
+            $table->foreignId('user_id');
             $table->foreignId('enemy_id')->constrained();
             $table->integer('enemy_health');
             $table->timestamps();

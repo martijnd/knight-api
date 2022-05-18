@@ -17,7 +17,7 @@ class WeaponFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->word,
+            'name' => $this->faker->word(),
             'damage' => $this->faker->numberBetween(1, 10),
         ];
     }

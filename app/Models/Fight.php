@@ -15,6 +15,11 @@ class Fight extends Model
         'enemy_health',
     ];
 
+    public function enemy()
+    {
+        return $this->belongsTo(Enemy::class);
+    }
+
     public function enemyIsAlive()
     {
         return $this->enemy_health > 0;

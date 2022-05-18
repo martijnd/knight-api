@@ -9,7 +9,7 @@ base_strength: int
 gold: int
 health: int
 max_health: int
-active_weapon_id: int
+weapon_id: int
 ActiveWeapon: Weapon
 weapons: Weapon[]
 armor: Armor[]

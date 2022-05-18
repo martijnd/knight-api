@@ -30,7 +30,7 @@ Route::post('/tokens/create', function (Request $request) {
 
     $user = User::create($validated);
 
-    $user->update(['active_weapon_id' => Weapon::first()->id]);
+    $user->update(['weapon_id' => Weapon::first()->id]);
 
     $token = $user->createToken('token');
 
@@ -43,14 +43,14 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::post('/enemies/{enemy}/fight', function (Enemy $enemy, Request $request) {
-        $request->user()->fight($enemy);
+        $request->user()->initiateFight($enemy);
 
         return response()->json(['message' => 'success']);
-    });
+    })->name('fight');
 
-    Route::post('/enemies/{enemy}/attack', function (Enemy $enemy, Request $request) {
-        $result = $request->user()->attack($enemy);
+    Route::post('/attack', function (Request $request) {
+        $result = $request->user()->attack();
 
         return response()->json(['data' => $result]);
-    });
+    })->name('attack');
 });
