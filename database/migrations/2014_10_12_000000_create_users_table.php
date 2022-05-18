@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('username')->unique();
-            $table->integer('health');
+            $table->integer('health')->default(100);
             $table->smallInteger('active_weapon_id')->nullable();
             $table->timestamps();
         });

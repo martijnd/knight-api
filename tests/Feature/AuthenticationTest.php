@@ -14,7 +14,8 @@ it('creates and authenticates a user', function () {
   ];
 
   // Generate a token
-  $response = postJson('/api/tokens/create', $payload);
+  $response = postJson('/api/tokens/create', $payload)
+    ->assertOk();
 
   $token = $response['token'];
 
