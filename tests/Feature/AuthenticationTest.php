@@ -23,5 +23,20 @@ it('creates and authenticates a user', function () {
 
   $response->assertOk();
 
-  expect($response->decodeResponseJson()['username'])->toBe($username);
+  expect($response->content())->toContain($username);
+});
+
+it('handles existing usernames', function () {
+    $username = 'TestUser';
+    $payload = [
+      'username' => $username,
+    ];
+
+    // Generate a token
+    postJson('/api/tokens/create', $payload)
+      ->assertOk();
+
+    postJson('/api/tokens/create', $payload)
+      ->assertStatus(401)
+      ->assertJson(['message' => 'Username already taken.']);
 });
