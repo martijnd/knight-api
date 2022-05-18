@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('gold')->default(100);
             $table->foreignId('weapon_id')->nullable()->constrained();
             $table->foreignId('location_id')->constrained();
+            $table->timestamp('arriving_at')->nullable();
             $table->timestamps();
         });
     }

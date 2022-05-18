@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Exceptions\LocationMismatchException;
 use App\Exceptions\UserAlreadyFightingException;
+use App\Exceptions\UserIsTravelingException;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -22,10 +24,19 @@ class User extends Authenticatable
         'username',
         'weapon_id',
         'location_id',
+        'arriving_at',
+    ];
+
+    protected $casts = [
+        'arriving_at' => 'datetime',
     ];
 
     public function initiateFight(Enemy $enemy)
     {
+        if ($this->isTraveling()) {
+            throw new UserIsTravelingException();
+        }
+
         $this->load('fight');
         if ($this->fight) {
             throw new UserAlreadyFightingException;
@@ -44,6 +55,13 @@ class User extends Authenticatable
         );
     }
 
+    protected function arrivingIn(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($_, $attributes) => now()->diffInSeconds($attributes['arriving_at']),
+        );
+    }
+
     public function attack()
     {
         $this->load('fight');
@@ -51,9 +69,9 @@ class User extends Authenticatable
         $this->health -= $enemy->damage;
 
         // If killed by enemy attack
-        if (! $this->isAlive()) {
+        if (!$this->isAlive()) {
             $this->update(['health' => 100, 'gold' => intval($this->gold / 2)]);
-            
+
             return ['message' => 'You died!', 'data' => ['gold' => intval($this->gold / 2)]];
         }
 
@@ -75,7 +93,7 @@ class User extends Authenticatable
 
         // If the enemy is killed, update the user's gold
         $this->update(['gold' => $this->gold += $enemy->loot]);
-        
+
         // The fight is over, so delete it
         $this->fight->delete();
 
@@ -84,6 +102,19 @@ class User extends Authenticatable
             'enemy_health' => 0,
             'loot' => $enemy->loot,
         ];
+    }
+
+    public function travelTo(Location $location)
+    {
+        $this->update([
+            'location_id' => $location->id,
+            'arriving_at' => now()->addSeconds($this->location->distanceTo($location)),
+        ]);
+    }
+
+    public function isTraveling()
+    {
+        return $this->arriving_at > now();
     }
 
     public function isAlive()
@@ -99,5 +130,10 @@ class User extends Authenticatable
     public function fight()
     {
         return $this->hasOne(Fight::class, 'user_id');
+    }
+
+    public function location()
+    {
+        return $this->belongsTo(Location::class);
     }
 }

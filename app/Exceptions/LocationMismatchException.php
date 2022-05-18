@@ -8,6 +8,6 @@ class LocationMismatchException extends Exception
 {
     public function render()
     {
-        return response()->json('You are not in the correct location.', 401);
+        return response()->json(['message' => 'You are not in the correct location.'], 401);
     }
 }
