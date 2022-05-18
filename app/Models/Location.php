@@ -9,7 +9,8 @@ class Location extends Model
 {
     use HasFactory;
 
-    public function distanceTo(Location $location) {
+    public function distanceTo(Location $location): int
+    {
         $x = $this->x - $location->x;
         $y = $this->y - $location->y;
 

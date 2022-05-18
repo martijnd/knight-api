@@ -4,9 +4,12 @@ namespace App\Models;
 
 use App\Exceptions\LocationMismatchException;
 use App\Exceptions\UserAlreadyFightingException;
+use App\Exceptions\UserIsNotFightingException;
 use App\Exceptions\UserIsTravelingException;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -31,7 +34,7 @@ class User extends Authenticatable
         'arriving_at' => 'datetime',
     ];
 
-    public function initiateFight(Enemy $enemy)
+    public function initiateFight(Enemy $enemy): Fight
     {
         if ($this->isTraveling()) {
             throw new UserIsTravelingException();
@@ -46,7 +49,7 @@ class User extends Authenticatable
             throw new LocationMismatchException;
         }
 
-        Fight::create(
+        return Fight::create(
             [
                 'user_id' => $this->id,
                 'enemy_id' => $enemy->id,
@@ -55,16 +58,23 @@ class User extends Authenticatable
         );
     }
 
+    /**
+     * @return Attribute<int,void>
+     */
     protected function arrivingIn(): Attribute
     {
         return Attribute::make(
-            get: fn ($_, $attributes) => now()->diffInSeconds($attributes['arriving_at']),
+            get: fn () => now()->diffInSeconds($this->arriving_at),
         );
     }
 
-    public function attack()
+    public function attack(): array
     {
         $this->load('fight');
+        if (!$this->fight || !$this->fight->enemy) {
+            throw new UserIsNotFightingException();
+        }
+
         $enemy = $this->fight->enemy;
         $this->health -= $enemy->damage;
 
@@ -104,35 +114,46 @@ class User extends Authenticatable
         ];
     }
 
-    public function travelTo(Location $location)
+    public function travelTo(Location $location): void
     {
-        $this->update([
-            'location_id' => $location->id,
-            'arriving_at' => now()->addSeconds($this->location->distanceTo($location)),
-        ]);
+        if ($this->location) {
+            $this->update([
+                'location_id' => $location->id,
+                'arriving_at' => now()->addSeconds($this->location->distanceTo($location)),
+            ]);
+        }
     }
 
-    public function isTraveling()
+    public function isTraveling(): bool
     {
         return $this->arriving_at > now();
     }
 
-    public function isAlive()
+    public function isAlive(): bool
     {
         return $this->health > 0;
     }
 
-    public function activeWeapon()
+    /**
+     * @return BelongsTo<Weapon,User>
+     */
+    public function activeWeapon(): BelongsTo
     {
         return $this->belongsTo(Weapon::class, 'weapon_id');
     }
 
-    public function fight()
+    /**
+     * @return HasOne<Fight>
+     */
+    public function fight(): HasOne
     {
         return $this->hasOne(Fight::class, 'user_id');
     }
 
-    public function location()
+    /**
+     * @return BelongsTo<Location,User>
+     */
+    public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
     }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Fight extends Model
 {
@@ -15,12 +16,17 @@ class Fight extends Model
         'enemy_health',
     ];
 
-    public function enemy()
+    /**
+     * The enemy that the user is fighting.
+     *
+     * @return BelongsTo<Enemy,Fight>
+     */
+    public function enemy(): BelongsTo
     {
         return $this->belongsTo(Enemy::class);
     }
 
-    public function enemyIsAlive()
+    public function enemyIsAlive(): bool
     {
         return $this->enemy_health > 0;
     }

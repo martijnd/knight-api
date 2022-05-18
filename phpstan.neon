@@ -1,0 +1,15 @@
+includes:
+    - ./vendor/nunomaduro/larastan/extension.neon
+
+parameters:
+
+    paths:
+        - app
+        - database
+
+    # The level 9 is the highest level
+    level: max
+
+    checkMissingIterableValueType: false
+
+    editorUrl: 'vscode://file/%%file%%:%%line%%'

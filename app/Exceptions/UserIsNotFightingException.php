@@ -5,12 +5,12 @@ namespace App\Exceptions;
 use Exception;
 use Illuminate\Http\JsonResponse;
 
-class UserIsTravelingException extends Exception
+class UserIsNotFightingException extends Exception
 {
     public function render(): JsonResponse
     {
         return response()->json([
-            'message' => 'User is currently traveling',
+            'message' => 'User is currently not fighting.',
         ], 401);
     }
 }
