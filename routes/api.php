@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\UsernameAlreadyTakenException;
+use App\Http\Controllers\EnemyController;
 use App\Models\Enemy;
 use App\Models\Location;
 use App\Models\User;
@@ -37,7 +38,7 @@ Route::post('/tokens/create', function (Request $request) {
 
     $token = $user->createToken('token');
 
-    return ['token' => $token->plainTextToken];
+    return ['token' => $token->plainTextToken, 'user' => $user];
 });
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -56,4 +57,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
         return response()->json(['data' => $result]);
     })->name('attack');
+
+    Route::apiResource('enemies', EnemyController::class)->only('index', 'show');
 });

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Enemy;
+use App\Models\Location;
 use App\Models\Weapon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -16,6 +17,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        Location::factory(10)->create();
+
         Weapon::factory()->create([
             'name' => 'Sword',
             'damage' => 14,

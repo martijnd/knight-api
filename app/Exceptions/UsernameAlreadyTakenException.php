@@ -9,6 +9,6 @@ class UsernameAlreadyTakenException extends Exception
 {
     public function render(): JsonResponse
     {
-        return response()->json(['message' => 'Username already taken.'], 401);
+        return response()->json(['message' => 'Username already taken.'], 409);
     }
 }
